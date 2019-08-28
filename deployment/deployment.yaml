@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: php
-        image: avtandilko/php-demo:0.0.6
+        image: avtandilko/php-demo:0.0.7
         ports:
         - containerPort: 9000
           name: php
