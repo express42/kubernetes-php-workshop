@@ -1,21 +1,37 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx
+  name: php
   labels:
-    app: nginx
+    app: php
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nginx
+      app: php
   template:
     metadata:
       labels:
-        app: nginx
+        app: php
     spec:
       containers:
+      - name: php
+        image: avtandilko/php-demo:0.0.6
+        ports:
+        - containerPort: 9000
+          name: php
+        readinessProbe:
+          tcpSocket:
+            port: php
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+        resources:
+          requests:
+            memory: 64Mi
+            cpu: 100m
+          limits:
+            memory: 128Mi
+            cpu: 200m
       - name: nginx
         image: bitnami/nginx:latest
         ports:

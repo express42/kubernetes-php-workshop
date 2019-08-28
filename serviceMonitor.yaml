@@ -11,5 +11,5 @@ spec:
       app: nginx
   endpoints:
   - port: http
-    path: /
+    path: /metrics
 

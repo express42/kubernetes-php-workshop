@@ -1,17 +1,24 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: nginx
+  name: php
   labels:
-    app: nginx
+    app: php
   annotations:
+    kubernetes.io/ingress.class: "nginx"
+    certmanager.k8s.io/cluster-issuer: "letsencrypt-production"
+    certmanager.k8s.io/acme-challenge-type: http01
 spec:
+  tls:
+  - hosts:
+    - app.example.com
+    secretName: app-tls
   rules:
     - host: app.example.com
       http:
         paths:
           - path: /
             backend:
-              serviceName: nginx
+              serviceName: php
               servicePort: 8080
   

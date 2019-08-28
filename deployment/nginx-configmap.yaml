@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: nginx-configmap
   labels:
-    app: nginx
+    app: php
 data:
   demo.conf: |-
     server {
@@ -20,7 +20,7 @@ data:
       }
       
       location ~ \.php$ {
-        fastcgi_pass php:9000;
+        fastcgi_pass localhost:9000;
         fastcgi_index index.php;
         include fastcgi.conf;
       }
