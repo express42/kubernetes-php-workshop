@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+  annotations:
+spec:
+  rules:
+    - host: app.example.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: nginx
+              servicePort: 8080
