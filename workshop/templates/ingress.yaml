@@ -14,4 +14,3 @@ spec:
             backend:
               serviceName: nginx
               servicePort: 8080
-  

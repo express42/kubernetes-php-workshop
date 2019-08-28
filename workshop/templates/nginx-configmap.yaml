@@ -10,15 +10,9 @@ data:
       listen 0.0.0.0:8080;
       server_name _;
       root /app;
-
       location / {
         try_files $uri $uri/index.php;
       }
-
-      location /metrics {
-        try_files $uri /metrics.php;
-      }
-      
       location ~ \.php$ {
         fastcgi_pass php:9000;
         fastcgi_index index.php;
