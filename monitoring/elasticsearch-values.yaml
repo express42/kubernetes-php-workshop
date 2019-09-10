@@ -1,0 +1,11 @@
+replicas: 1
+persistence:
+  enabled: true
+
+volumeClaimTemplate:
+  resources:
+    requests:
+      storage: 10Gi
+
+minimumMasterNodes: 1
+clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"

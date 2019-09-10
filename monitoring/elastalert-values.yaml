@@ -1,0 +1,20 @@
+elasticsearch:
+  host: "elasticsearch-master"
+  port: 9200
+
+writebackIndex: elastalert
+
+rules:
+  telegram: |-
+    ---
+    name: Alerts about 500 status
+    type: frequency
+    index: kubernetes_cluster-*
+    num_events: 3
+    timeframe:
+      minutes: 1
+    filter:
+    - query:
+        query_string:
+          query: "kubernetes.labels.release: nginx-ingress AND status: 500"
+    alert: []

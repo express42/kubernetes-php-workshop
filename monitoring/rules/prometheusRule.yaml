@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: prometheus-custom-rules
+spec:
+  groups:
+    - name: web
+      rules:
+        - alert: HttpErrors5xx
+          expr: increase(nginx_ingress_controller_requests{status=~"^5.."}[1m]) > 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "HTTP errors 5xx (instance {{ $labels.instance }})"
+            description: "HTTP requests with status 5xx exists\nLast minute errors = {{ $value }}"

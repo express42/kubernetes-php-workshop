@@ -1,0 +1,78 @@
+---
+prometheus:
+  prometheusSpec:
+    scrapeInterval: "10s"
+    ruleNamespaceSelector:
+      any: true
+    ruleSelector:
+      any: true
+    serviceMonitorNamespaceSelector:
+      any: true
+    serviceMonitorSelector:
+      any: true
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+  ingress: { enabled: false }
+
+kubeControllerManager: { enabled: false }
+
+coreDns: { enabled: false }
+
+kubeDns: { enabled: true }
+
+kubeEtcd: { enabled: false }
+
+kubeScheduler: { enabled: false }
+
+# Disabled because on GKE kube-proxy listen only localhost
+kubeProxy:
+  enabled: false
+  service:
+    selector:
+      k8s-app: null
+      component: kube-proxy
+
+grafana:
+  enabled: true
+  defaultDashboardsEnabled: true
+  adminPassword: admin
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: ALL
+
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      orgId: 1
+      access: proxy
+      editable: true
+      url: http://loki:3100/
+      jsonData:
+        maxLines: 1000
+
+alertmanager:
+  ingress: { enabled: false }
+
+  alertmanagerSpec:
+    replicas: 3
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ["alertname", "job"]
+      group_wait: 30s
+      group_interval: 1m
+      repeat_interval: 12h
+      receiver: "default-receiver"
+      routes: []
+    receivers:
+      - name: "default-receiver"
+        webhook_configs:
+          - send_resolved: false
+            url: http://127.0.0.1:80

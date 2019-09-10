@@ -1,0 +1,61 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cluster-health-rules
+spec:
+  groups:
+    - name: pods
+      rules:
+        - alert: ContainerOOMKilled
+          expr: max_over_time(kube_pod_container_status_terminated_reason{reason="OOMKilled"}[5m]) > 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Container {{ $labels.container }} in pod {{ $labels.namespace}}/{{ $labels.pod}} is OOMKilled"
+
+        - alert: ContainerWaiting
+          expr: max_over_time(kube_pod_container_status_waiting_reason[5m]) > 0
+          for: 3m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Container {{ $labels.container }} in pod {{ $labels.namespace}}/{{ $labels.pod}} cannot start in three minutes"
+
+    - name: volumes
+      rules:
+        - alert: VolumeOutOfDiskSpace
+          expr: kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes * 100 < 10
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Volume out of disk space (instance {{ $labels.instance }})"
+            description: "Volume is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+        - alert: VolumeFullInFourDays
+          expr: 100 * (kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes) < 15 and predict_linear(kubelet_volume_stats_available_bytes[6h], 4 * 24 * 3600) < 0
+          for: 5m
+          labels:
+            severity: error
+          annotations:
+            summary: "Volume full in four days (instance {{ $labels.instance }})"
+            description: "{{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is expected to fill up within four days. Currently {{ $value | humanize }}% is available.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+    - name: nodes
+      rules:
+        - alert: NodeCreated
+          expr: sum(kube_node_info offset 3m) < sum(kube_node_info)
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cluster autoscaled. New node created"
+
+        - alert: NodeDeleted
+          expr: sum(kube_node_info offset 3m) > sum(kube_node_info)
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cluster autoscaled. Node deleted"
